@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contabilidad Pro 3.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            padding: 10px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(255, 40, 0, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #D4AF37;
+            font-size: 24px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #FF2800;
+            font-size: 12px;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .version-badge {
+            text-align: center;
+            color: #00C853;
+            font-size: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Navegación por pestañas */
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 12px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            color: #e0e0e0;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #FF2800 0%, #cc2000 100%);
+            border-color: #FF2800;
+            box-shadow: 0 0 20px rgba(255, 40, 0, 0.5);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .balance-card.usd {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1) 0%, rgba(0, 200, 83, 0.05) 100%);
+            border-color: rgba(0, 200, 83, 0.3);
+        }
+
+        .balance-label {
+            color: #D4AF37;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .balance-amount.usd {
+            color: #00C853;
+        }
+
+        .balance-amount.negative {
+            color: #FF2800;
+        }
+
+        /* Nuevo: Breakdown de gastos */
+        .expense-breakdown {
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .breakdown-title {
+            color: #D4AF37;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            font-size: 13px;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-label {
+            color: #999;
+        }
+
+        .breakdown-value {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .breakdown-value.fijos {
+            color: #FF5252;
+        }
+
+        .breakdown-value.variables {
+            color: #FFC107;
+        }
+
+        .breakdown-value.discrecional {
+            color: #9C27B0;
+        }
+
+        /* Historial */
+        .history-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .history-item.ingreso {
+            border-left: 4px solid #00C853;
+        }
+
+        .history-item.egreso {
+            border-left: 4px solid #FF2800;
+        }
+
+        .history-item.transferencia {
+            border-left: 4px solid #2196F3;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-date {
+            color: #D4AF37;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .history-type {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .history-type.ingreso {
+            background: rgba(0, 200, 83, 0.2);
+            color: #00C853;
+        }
+
+        .history-type.egreso {
+            background: rgba(255, 40, 0, 0.2);
+            color: #FF2800;
+        }
+
+        .history-type.transferencia {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+
+        .history-category {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .history-description {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .history-amount {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .amount-badge {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .amount-badge.ars {
+            color: #D4AF37;
+        }
+
+        .amount-badge.usd {
+            color: #00C853;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background: rgba(212, 175, 55, 0.2);
+            color: #D4AF37;
+            border: 1px solid #D4AF37;
+        }
+
+        .btn-edit:hover {
+            background: #D4AF37;
+            color: #000;
+        }
+
+        .btn-delete {
+            background: rgba(255, 40, 0, 0.2);
+            color: #FF2800;
+            border: 1px solid #FF2800;
+        }
+
+        .btn-delete:hover {
+            background: #FF2800;
+            color: #fff;
+        }
+
+        /* Formulario */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #D4AF37;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        label .optional {
+            color: #666;
+            font-size: 10px;
+            font-weight: 400;
+            text-transform: lowercase;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #FF2800;
+            box-shadow: 0 0 15px rgba(255, 40, 0, 0.3);
+        }
+
+        input.error, select.error {
+            border-color: #FF2800;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .error-message {
+            color: #FF2800;
+            font-size: 11px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #FF2800;
+        }
+
+        .checkbox-label {
+            color: #e0e0e0;
+            font-size: 13px;
+            text-transform: none;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .dual-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            padding: 10px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #FF2800 0%, #cc2000 100%);
+            border-color: #FF2800;
+            box-shadow: 0 0 20px rgba(255, 40, 0, 0.5);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #FF2800 0%, #cc2000 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(255, 40, 0, 0.4);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(255, 40, 0, 0.6);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 13px;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+        }
+
+        .message.error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff0000;
+        }
+
+        .message.warning {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            color: #FFC107;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 50px;
+        }
+
+        .currency-label {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .info-box {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #FFC107;
+        }
+
+        .info-box.blue {
+            background: rgba(33, 150, 243, 0.1);
+            border-color: rgba(33, 150, 243, 0.3);
+            color: #2196F3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #D4AF37;
+        }
+
+        .spinner {
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-top: 3px solid #D4AF37;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        /* Scrollbar personalizado */
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: rgba(10, 10, 10, 0.5);
+            border-radius: 10px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 10px;
+        }
+
+        /* Offline indicator */
+        .offline-indicator {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FF2800;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            z-index: 1000;
+            display: none;
+        }
+
+        .offline-indicator.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-50px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        /* Nuevo: Badge para categoría tipo */
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+
+        .category-badge.fijo {
+            background: rgba(255, 82, 82, 0.2);
+            color: #FF5252;
+        }
+
+        .category-badge.variable {
+            background: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+        }
+
+        .category-badge.discrecional {
+            background: rgba(156, 39, 176, 0.2);
+            color: #9C27B0;
+        }
+
+        .category-badge.capital {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-indicator" id="offlineIndicator">
+        ⚠️ Sin conexión - Los datos se guardarán localmente
+    </div>
+
+    <div class="container">
+        <h1>💰 Contabilidad Pro 3.0</h1>
+        <p class="subtitle">Sistema Bimonetario Profesional</p>
+        <p class="version-badge">✨ Nueva Estructura de Categorías</p>
+
+        <!-- Navegación por pestañas -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+            <button class="tab-btn" data-tab="nuevo">➕ Nuevo</button>
+            <button class="tab-btn" data-tab="historial">📜 Historial</button>
+        </div>
+
+        <!-- TAB 1: DASHBOARD -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="balance-card">
+                    <div class="balance-label">Balance ARS</div>
+                    <div class="balance-amount" id="balanceARS">$0.00</div>
+                </div>
+                <div class="balance-card usd">
+                    <div class="balance-label">Balance USD</div>
+                    <div class="balance-amount usd" id="balanceUSD">US$0.00</div>
+                </div>
+            </div>
+
+            <!-- Breakdown de gastos -->
+            <div class="expense-breakdown">
+                <div class="breakdown-title">📊 Análisis de Gastos</div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Gastos Fijos:</span>
+                    <span class="breakdown-value fijos" id="gastosFijos">$0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Gastos Variables:</span>
+                    <span class="breakdown-value variables" id="gastosVariables">$0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Gastos Discrecionales:</span>
+                    <span class="breakdown-value discrecional" id="gastosDiscrecionales">$0.00</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Total Egresos:</span>
+                    <span class="breakdown-value" id="totalEgresos">$0.00</span>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin-top: 15px;">
+                💡 <strong>Tip:</strong> Controla tus gastos fijos (estructura) vs discrecionales (ajustables).
+            </div>
+
+            <button class="submit-btn" onclick="switchTab('nuevo')">
+                🚀 Registrar Nuevo Movimiento
+            </button>
+        </div>
+
+        <!-- TAB 2: NUEVO MOVIMIENTO -->
+        <div id="nuevo" class="tab-content">
+            <form id="movimientoForm">
+                <!-- Modo de Operación -->
+                <div class="mode-selector">
+                    <button type="button" class="mode-btn active" data-mode="normal">Normal</button>
+                    <button type="button" class="mode-btn" data-mode="cambio">Cambio/Ahorro</button>
+                </div>
+
+                <!-- Info modo cambio -->
+                <div id="infoCambio" class="info-box hidden">
+                    💱 <strong>Modo Cambio:</strong> Se registrarán automáticamente DOS movimientos vinculados: un egreso de ARS y un ingreso de USD con la tasa de cambio calculada.
+                </div>
+
+                <!-- Info transferencia -->
+                <div id="infoTransferencia" class="info-box blue hidden">
+                    🔄 <strong>Nota:</strong> Los pagos de tarjetas y transferencias son movimientos de capital, no gastos. Se marcarán como "Transferencia" para diferenciarlos.
+                </div>
+
+                <!-- Fecha -->
+                <div class="form-group">
+                    <label>Fecha *</label>
+                    <input type="date" id="fecha" required>
+                    <div class="error-message" id="errorFecha">Selecciona una fecha válida</div>
+                </div>
+
+                <!-- Tipo -->
+                <div class="form-group">
+                    <label>Tipo *</label>
+                    <select id="tipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Ingreso">Ingreso</option>
+                        <option value="Egreso">Egreso</option>
+                    </select>
+                    <div class="error-message" id="errorTipo">Selecciona un tipo</div>
+                </div>
+
+                <!-- Categoría y Subcategoría -->
+                <div class="form-group">
+                    <label>Categoría *</label>
+                    <select id="categoria" required>
+                        <option value="">Seleccionar...</option>
+                    </select>
+                    <div class="error-message" id="errorCategoria">Selecciona una categoría</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Subcategoría *</label>
+                    <select id="subcategoria" required>
+                        <option value="">Seleccionar categoría primero...</option>
+                    </select>
+                    <div class="error-message" id="errorSubcategoria">Selecciona una subcategoría</div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="form-group">
+                    <label>Descripción <span class="optional">(opcional)</span></label>
+                    <textarea id="descripcion" placeholder="Detalle del movimiento..." maxlength="500"></textarea>
+                </div>
+
+                <!-- Montos - Modo Normal -->
+                <div id="montosNormal">
+                    <div class="dual-input">
+                        <div class="form-group">
+                            <label>Monto ARS</label>
+                            <input type="number" id="montoARS" step="0.01" placeholder="0.00" min="0">
+                            <div class="error-message" id="errorMontoARS">Ingresa un monto válido</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto USD</label>
+                            <input type="number" id="montoUSD" step="0.01" placeholder="0.00" min="0">
+                            <div class="error-message" id="errorMontoUSD">Ingresa un monto válido</div>
+                        </div>
+                    </div>
+                    <div class="error-message" id="errorMontos">Debes ingresar al menos un monto mayor a 0</div>
+                </div>
+
+                <!-- Montos - Modo Cambio -->
+                <div id="montosCambio" class="hidden">
+                    <div class="dual-input">
+                        <div class="form-group">
+                            <label>ARS Entregados *</label>
+                            <input type="number" id="arsEntregados" step="0.01" placeholder="0.00" min="0">
+                            <div class="currency-label">Cantidad que entregas</div>
+                            <div class="error-message" id="errorARSEntregados">Ingresa un monto válido</div>
+                        </div>
+                        <div class="form-group">
+                            <label>USD Recibidos *</label>
+                            <input type="number" id="usdRecibidos" step="0.01" placeholder="0.00" min="0">
+                            <div class="currency-label">Cantidad que recibes</div>
+                            <div class="error-message" id="errorUSDRecibidos">Ingresa un monto válido</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gasto Compartido -->
+                <div class="checkbox-group" id="compartidoGroup">
+                    <input type="checkbox" id="compartido">
+                    <label for="compartido" class="checkbox-label">🤝 Pagué el 100%, recuperaré el 50%</label>
+                </div>
+
+                <!-- Cuenta -->
+                <div class="form-group">
+                    <label>Cuenta *</label>
+                    <select id="cuenta" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Efectivo ARS">Efectivo ARS</option>
+                        <option value="Efectivo USD">Efectivo USD</option>
+                        <option value="Cuenta Banco">Cuenta Banco</option>
+                        <option value="Tarjeta Débito">Tarjeta Débito</option>
+                        <option value="Mercado Pago">Mercado Pago</option>
+                        <option value="Brubank">Brubank</option>
+                        <option value="Ualá">Ualá</option>
+                        <optgroup label="Tarjetas de Crédito">
+                            <option value="TDC Supervielle">TDC Supervielle</option>
+                            <option value="TDC Cencosud">TDC Cencosud</option>
+                            <option value="TDC Santander">TDC Santander</option>
+                            <option value="Otra TDC">Otra TDC</option>
+                        </optgroup>
+                        <option value="Otra">Otra</option>
+                    </select>
+                    <div class="error-message" id="errorCuenta">Selecciona una cuenta</div>
+                </div>
+
+                <!-- Modalidad -->
+                <div class="form-group">
+                    <label>Modalidad *</label>
+                    <select id="modalidad" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Contado">Contado</option>
+                        <option value="Cuotas">Cuotas</option>
+                        <option value="Débito Automático">Débito Automático</option>
+                        <option value="Transferencia">Transferencia</option>
+                    </select>
+                    <div class="error-message" id="errorModalidad">Selecciona una modalidad</div>
+                </div>
+
+                <!-- Cuotas -->
+                <div class="form-group">
+                    <label>Cuotas <span class="optional">(si aplica)</span></label>
+                    <input type="number" id="cuotas" min="1" value="1">
+                </div>
+
+                <!-- Pagador -->
+                <div class="form-group">
+                    <label>Pagador <span class="optional">(opcional)</span></label>
+                    <input type="text" id="pagador" placeholder="Nombre del pagador" maxlength="100">
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🚀 Registrar Movimiento
+                </button>
+            </form>
+
+            <div id="message" class="message"></div>
+        </div>
+
+        <!-- TAB 3: HISTORIAL -->
+        <div id="historial" class="tab-content">
+            <div id="historialContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Cargando movimientos...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ CONFIGURACIÓN ============
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbww29s3vqnl9wqBDD5ZmLfxjq5SQmreZRMonIwj8tZ4FL3ZDvferqbLm9IdEVMxO1-9/exec'; // Reemplazar con la URL /exec del Apps Script
+        const LOCALSTORAGE_KEY = 'contabilidad_movimientos_pendientes';
+        const CACHE_KEY = 'contabilidad_historial_cache';
+
+        // ============ NUEVA ESTRUCTURA DE CATEGORÍAS v3.0 ============
+        const categorias = {
+            // 1. INGRESOS (Entradas de Capital)
+            'INGRESOS': [
+                'Sueldo/Salario',
+                'Honorarios/Freelance',
+                'Rentas Cobradas',
+                'Remesas Recibidas',
+                'Rendimientos de Inversiones',
+                'Reembolsos',
+                'Otros Ingresos'
+            ],
+            
+            // 2. GASTOS FIJOS (Estructura de Vida)
+            'GASTOS FIJOS - VIVIENDA': [
+                'Alquiler',
+                'Expensas',
+                'Agua',
+                'Luz',
+                'Gas',
+                'Internet',
+                'Teléfono',
+                'Impuesto Inmobiliario/ABL',
+                'Otro'
+            ],
+            
+            'GASTOS FIJOS - SEGUROS Y SALUD': [
+                'Seguro de Vida',
+                'Seguro de Hogar',
+                'Obra Social/Prepaga',
+                'Gimnasio',
+                'Otro'
+            ],
+            
+            'GASTOS FIJOS - SERVICIOS FINANCIEROS': [
+                'Mantenimiento de Cuenta',
+                'Renovación de Tarjetas',
+                'Impuestos Bancarios',
+                'Comisiones',
+                'Otro'
+            ],
+            
+            // 3. GASTOS VARIABLES (Consumo Operativo)
+            'GASTOS VARIABLES - ALIMENTACIÓN': [
+                'Supermercado',
+                'Almacén',
+                'Carnicería',
+                'Panadería',
+                'Verdulería',
+                'Fiambrería',
+                'Otro'
+            ],
+            
+            'GASTOS VARIABLES - TRANSPORTE': [
+                'Combustible',
+                'Mantenimiento Vehículo',
+                'Estacionamiento',
+                'Peajes',
+                'Seguro de Auto',
+                'Patente',
+                'VTV',
+                'Lavadero',
+                'SUBE',
+                'Taxi/Uber',
+                'Otro'
+            ],
+            
+            'GASTOS VARIABLES - SALUD': [
+                'Medicamentos',
+                'Consultas Médicas',
+                'Estudios',
+                'Odontología',
+                'Otro'
+            ],
+            
+            'GASTOS VARIABLES - HIGIENE Y LIMPIEZA': [
+                'Artículos de Aseo Personal',
+                'Productos de Limpieza',
+                'Otro'
+            ],
+            
+            'GASTOS VARIABLES - MASCOTAS': [
+                'Comida',
+                'Accesorios',
+                'Veterinaria',
+                'Otro'
+            ],
+            
+            // 4. CUIDADO PERSONAL Y ESTÉTICA
+            'CUIDADO PERSONAL Y ESTÉTICA': [
+                'Peluquería/Barbería',
+                'Uñas',
+                'Podología',
+                'Depilación',
+                'Cejas',
+                'Otro'
+            ],
+            
+            'VESTIMENTA': [
+                'Ropa',
+                'Calzado',
+                'Accesorios',
+                'Otro'
+            ],
+            
+            // 5. OCIO Y ESTILO DE VIDA (Discrecional)
+            'OCIO Y ENTRETENIMIENTO': [
+                'Cenas/Restaurantes',
+                'Bares/Rumbas',
+                'Cumpleaños',
+                'Salidas con Amigos',
+                'Espectáculos',
+                'Cine/Teatro',
+                'Otro'
+            ],
+            
+            'VIAJES': [
+                'Alojamiento',
+                'Pasajes',
+                'Excursiones',
+                'Otro'
+            ],
+            
+            'REGALOS Y OCASIONES': [
+                'Regalos Personales',
+                'Regalos Sociales',
+                'Celebraciones',
+                'Otro'
+            ],
+            
+            'VICIOS Y GUSTOS': [
+                'Cigarros',
+                'Otros Vicios',
+                'Gustos Personales'
+            ],
+            
+            'HOGAR - MEJORAS': [
+                'Reparaciones',
+                'Decoración',
+                'Herramientas',
+                'Electrodomésticos',
+                'Jardinería/Huerta',
+                'Muebles',
+                'Otro'
+            ],
+            
+            // 6. EDUCACIÓN Y TECNOLOGÍA
+            'EDUCACIÓN Y FORMACIÓN': [
+                'Matrícula/Cuotas',
+                'Útiles Escolares',
+                'Cursos Online',
+                'Libros',
+                'Talleres',
+                'Otro'
+            ],
+            
+            'TECNOLOGÍA': [
+                'Celular/Hardware',
+                'Suscripciones Digitales (IA)',
+                'Netflix/Streaming',
+                'Software',
+                'Accesorios',
+                'Reparaciones',
+                'Otro'
+            ],
+            
+            // 7. GESTIÓN DE CAPITAL Y PASIVOS
+            'AHORRO Y RESERVAS': [
+                'Aporte Común ARS',
+                'Aporte Individual ARS',
+                'Aporte Común USD',
+                'Aporte Individual USD',
+                'Fondo de Emergencia',
+                'Compra de Inversiones',
+                'Otro'
+            ],
+            
+            'TRANSFERENCIAS A TERCEROS': [
+                'Remesas Familiares',
+                'Remesas Amigos',
+                'Préstamos Otorgados',
+                'Ayuda Económica',
+                'Otro'
+            ],
+            
+            'PAGO DE DEUDAS (TDC)': [
+                'Supervielle',
+                'Cencosud',
+                'Santander',
+                'Otra Tarjeta',
+                'Préstamo Personal',
+                'Otro'
+            ],
+            
+            'CAMBIO DE DIVISAS': [
+                'ARS a USD',
+                'USD a ARS',
+                'Otra Conversión'
+            ]
+        };
+
+        // Mapeo de categorías por tipo (para análisis)
+        const tipoCategoria = {
+            'GASTOS FIJOS - VIVIENDA': 'fijo',
+            'GASTOS FIJOS - SEGUROS Y SALUD': 'fijo',
+            'GASTOS FIJOS - SERVICIOS FINANCIEROS': 'fijo',
+            'GASTOS VARIABLES - ALIMENTACIÓN': 'variable',
+            'GASTOS VARIABLES - TRANSPORTE': 'variable',
+            'GASTOS VARIABLES - SALUD': 'variable',
+            'GASTOS VARIABLES - HIGIENE Y LIMPIEZA': 'variable',
+            'GASTOS VARIABLES - MASCOTAS': 'variable',
+            'CUIDADO PERSONAL Y ESTÉTICA': 'discrecional',
+            'VESTIMENTA': 'discrecional',
+            'OCIO Y ENTRETENIMIENTO': 'discrecional',
+            'VIAJES': 'discrecional',
+            'REGALOS Y OCASIONES': 'discrecional',
+            'VICIOS Y GUSTOS': 'discrecional',
+            'HOGAR - MEJORAS': 'discrecional',
+            'EDUCACIÓN Y FORMACIÓN': 'discrecional',
+            'TECNOLOGÍA': 'discrecional',
+            'AHORRO Y RESERVAS': 'capital',
+            'TRANSFERENCIAS A TERCEROS': 'capital',
+            'PAGO DE DEUDAS (TDC)': 'capital',
+            'CAMBIO DE DIVISAS': 'capital',
+            'INGRESOS': 'ingreso'
+        };
+
+        // Categorías que son transferencias (no gastos reales)
+        const categoriasTransferencia = [
+            'PAGO DE DEUDAS (TDC)',
+            'AHORRO Y RESERVAS',
+            'CAMBIO DE DIVISAS'
+        ];
+
+        // ============ ELEMENTOS DEL DOM ============
+        const form = document.getElementById('movimientoForm');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const montosNormal = document.getElementById('montosNormal');
+        const montosCambio = document.getElementById('montosCambio');
+        const infoCambio = document.getElementById('infoCambio');
+        const infoTransferencia = document.getElementById('infoTransferencia');
+        const compartidoGroup = document.getElementById('compartidoGroup');
+        const categoriaSelect = document.getElementById('categoria');
+        const subcategoriaSelect = document.getElementById('subcategoria');
+        const tipoSelect = document.getElementById('tipo');
+        const fechaInput = document.getElementById('fecha');
+        const messageDiv = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const offlineIndicator = document.getElementById('offlineIndicator');
+
+        let modoActual = 'normal';
+        let isSubmitting = false;
+
+        // ============ INICIALIZACIÓN ============
+        document.addEventListener('DOMContentLoaded', () => {
+            // Establecer fecha de hoy
+            const hoy = new Date();
+            fechaInput.value = hoy.toISOString().split('T')[0];
+            fechaInput.max = hoy.toISOString().split('T')[0];
+
+            // Cargar categorías
+            Object.keys(categorias).forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                categoriaSelect.appendChild(option);
+            });
+
+            // Verificar conexión
+            checkOnlineStatus();
+            window.addEventListener('online', checkOnlineStatus);
+            window.addEventListener('offline', checkOnlineStatus);
+
+            // Sincronizar movimientos pendientes
+            syncPendingMovements();
+
+            // Cargar dashboard
+            loadDashboard();
+        });
+
+        // ============ NAVEGACIÓN POR PESTAÑAS ============
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                switchTab(tabName);
+            });
+        });
+
+        function switchTab(tabName) {
+            tabButtons.forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+
+            if (tabName === 'dashboard') {
+                loadDashboard();
+            } else if (tabName === 'historial') {
+                loadHistorial();
+            }
+        }
+
+        // ============ MODO DE OPERACIÓN ============
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                modoActual = btn.dataset.mode;
+
+                if (modoActual === 'normal') {
+                    montosNormal.classList.remove('hidden');
+                    montosCambio.classList.add('hidden');
+                    infoCambio.classList.add('hidden');
+                    compartidoGroup.classList.remove('hidden');
+                    tipoSelect.disabled = false;
+                } else {
+                    montosNormal.classList.add('hidden');
+                    montosCambio.classList.remove('hidden');
+                    infoCambio.classList.remove('hidden');
+                    compartidoGroup.classList.add('hidden');
+                    tipoSelect.disabled = true;
+                    tipoSelect.value = 'Egreso';
+                    
+                    // Forzar categoría Cambio de Divisas
+                    categoriaSelect.value = 'CAMBIO DE DIVISAS';
+                    categoriaSelect.dispatchEvent(new Event('change'));
+                }
+
+                clearErrors();
+            });
+        });
+
+        // ============ CATEGORÍAS DINÁMICAS ============
+        categoriaSelect.addEventListener('change', () => {
+            const categoria = categoriaSelect.value;
+            subcategoriaSelect.innerHTML = '<option value="">Seleccionar...</option>';
+
+            if (categoria && categorias[categoria]) {
+                categorias[categoria].forEach(sub => {
+                    const option = document.createElement('option');
+                    option.value = sub;
+                    option.textContent = sub;
+                    subcategoriaSelect.appendChild(option);
+                });
+                subcategoriaSelect.disabled = false;
+
+                // Mostrar info si es transferencia
+                if (categoriasTransferencia.includes(categoria)) {
+                    infoTransferencia.classList.remove('hidden');
+                } else {
+                    infoTransferencia.classList.add('hidden');
+                }
+            } else {
+                subcategoriaSelect.disabled = true;
+                infoTransferencia.classList.add('hidden');
+            }
+
+            subcategoriaSelect.classList.remove('error');
+            document.getElementById('errorSubcategoria').classList.remove('show');
+        });
+
+        // Validar tipo vs categoría
+        tipoSelect.addEventListener('change', () => {
+            const tipo = tipoSelect.value;
+            
+            if (tipo === 'Ingreso' && categoriaSelect.value && categoriaSelect.value !== 'INGRESOS') {
+                showMessage('⚠️ Los ingresos solo pueden usar la categoría "INGRESOS"', 'warning');
+                categoriaSelect.value = '';
+                subcategoriaSelect.innerHTML = '<option value="">Seleccionar categoría primero...</option>';
+            }
+        });
+
+        // ============ VALIDACIÓN DEL FORMULARIO ============
+        function validateForm() {
+            let isValid = true;
+            clearErrors();
+
+            // Validar fecha
+            if (!fechaInput.value) {
+                showError('fecha');
+                isValid = false;
+            }
+
+            // Validar tipo
+            if (modoActual === 'normal' && !tipoSelect.value) {
+                showError('tipo');
+                isValid = false;
+            }
+
+            // Validar categoría
+            if (!categoriaSelect.value) {
+                showError('categoria');
+                isValid = false;
+            }
+
+            // Validar subcategoría
+            if (!subcategoriaSelect.value) {
+                showError('subcategoria');
+                isValid = false;
+            }
+
+            // Validar coherencia tipo-categoría
+            if (tipoSelect.value === 'Ingreso' && categoriaSelect.value !== 'INGRESOS') {
+                showMessage('❌ Los ingresos deben usar la categoría "INGRESOS"', 'error');
+                isValid = false;
+            }
+
+            if (tipoSelect.value === 'Egreso' && categoriaSelect.value === 'INGRESOS') {
+                showMessage('❌ La categoría "INGRESOS" solo es válida para tipo "Ingreso"', 'error');
+                isValid = false;
+            }
+
+            // Validar cuenta
+            if (!document.getElementById('cuenta').value) {
+                showError('cuenta');
+                isValid = false;
+            }
+
+            // Validar modalidad
+            if (!document.getElementById('modalidad').value) {
+                showError('modalidad');
+                isValid = false;
+            }
+
+            // Validar montos según modo
+            if (modoActual === 'normal') {
+                const montoARS = parseFloat(document.getElementById('montoARS').value) || 0;
+                const montoUSD = parseFloat(document.getElementById('montoUSD').value) || 0;
+
+                if (montoARS < 0) {
+                    showError('montoARS');
+                    isValid = false;
+                }
+                if (montoUSD < 0) {
+                    showError('montoUSD');
+                    isValid = false;
+                }
+                if (montoARS === 0 && montoUSD === 0) {
+                    document.getElementById('errorMontos').classList.add('show');
+                    isValid = false;
+                }
+            } else {
+                const arsEntregados = parseFloat(document.getElementById('arsEntregados').value) || 0;
+                const usdRecibidos = parseFloat(document.getElementById('usdRecibidos').value) || 0;
+
+                if (arsEntregados <= 0) {
+                    showError('arsEntregados');
+                    isValid = false;
+                }
+                if (usdRecibidos <= 0) {
+                    showError('usdRecibidos');
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        function showError(fieldName) {
+            const field = document.getElementById(fieldName);
+            const errorMsg = document.getElementById(`error${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}`);
+            
+            if (field) field.classList.add('error');
+            if (errorMsg) errorMsg.classList.add('show');
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+        }
+
+        // ============ ENVÍO DEL FORMULARIO ============
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (isSubmitting) return;
+
+            if (!validateForm()) {
+                showMessage('❌ Por favor, completa todos los campos requeridos correctamente', 'error');
+                return;
+            }
+
+            isSubmitting = true;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Enviando...';
+
+            try {
+                if (modoActual === 'normal') {
+                    await enviarMovimientoNormal();
+                } else {
+                    await enviarMovimientoCambio();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('❌ Error al registrar. Intenta nuevamente.', 'error');
+            } finally {
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Registrar Movimiento';
+            }
+        });
+
+        async function enviarMovimientoNormal() {
+            const fecha = new Date(fechaInput.value + 'T00:00:00');
+            const mes = fecha.toLocaleString('es-ES', { month: 'long' });
+            const año = fecha.getFullYear();
+
+            const montoARS = parseFloat(document.getElementById('montoARS').value) || 0;
+            const montoUSD = parseFloat(document.getElementById('montoUSD').value) || 0;
+            const compartido = document.getElementById('compartido').checked;
+            const categoria = categoriaSelect.value;
+
+            // Determinar si es transferencia
+            const esTransferencia = categoriasTransferencia.includes(categoria);
+            const tipoFinal = esTransferencia ? 'Transferencia' : tipoSelect.value;
+
+            const data = {
+                fecha: fechaInput.value,
+                mes: mes.charAt(0).toUpperCase() + mes.slice(1),
+                año: año,
+                tipo: tipoFinal,
+                categoria: categoria,
+                subcategoria: subcategoriaSelect.value,
+                descripcion: document.getElementById('descripcion').value,
+                montoARS: montoARS,
+                compartidoARS: compartido ? montoARS * 0.5 : 0,
+                montoUSD: montoUSD,
+                compartidoUSD: compartido ? montoUSD * 0.5 : 0,
+                cuenta: document.getElementById('cuenta').value,
+                modalidad: document.getElementById('modalidad').value,
+                cuotas: parseInt(document.getElementById('cuotas').value) || 1,
+                pendiente: compartido ? 'Cuenta por cobrar: 50%' : (esTransferencia ? 'Movimiento de capital' : ''),
+                pagador: document.getElementById('pagador').value
+            };
+
+            await enviarAGoogleSheets(data);
+        }
+
+        async function enviarMovimientoCambio() {
+            const fecha = new Date(fechaInput.value + 'T00:00:00');
+            const mes = fecha.toLocaleString('es-ES', { month: 'long' });
+            const año = fecha.getFullYear();
+
+            const arsEntregados = parseFloat(document.getElementById('arsEntregados').value) || 0;
+            const usdRecibidos = parseFloat(document.getElementById('usdRecibidos').value) || 0;
+            const tasaCambio = (arsEntregados / usdRecibidos).toFixed(2);
+            const descripcionBase = document.getElementById('descripcion').value;
+
+            // MOVIMIENTO 1: Egreso de ARS
+            const egreso = {
+                fecha: fechaInput.value,
+                mes: mes.charAt(0).toUpperCase() + mes.slice(1),
+                año: año,
+                tipo: 'Transferencia',
+                categoria: 'CAMBIO DE DIVISAS',
+                subcategoria: subcategoriaSelect.value || 'ARS a USD',
+                descripcion: `Cambio ARS→USD (Tasa: $${tasaCambio}) ${descripcionBase}`,
+                montoARS: arsEntregados,
+                compartidoARS: 0,
+                montoUSD: 0,
+                compartidoUSD: 0,
+                cuenta: document.getElementById('cuenta').value,
+                modalidad: document.getElementById('modalidad').value,
+                cuotas: 1,
+                pendiente: `Vinculado a ingreso USD ${usdRecibidos}`,
+                pagador: document.getElementById('pagador').value
+            };
+
+            // MOVIMIENTO 2: Ingreso de USD
+            const ingreso = {
+                fecha: fechaInput.value,
+                mes: mes.charAt(0).toUpperCase() + mes.slice(1),
+                año: año,
+                tipo: 'Transferencia',
+                categoria: 'CAMBIO DE DIVISAS',
+                subcategoria: subcategoriaSelect.value || 'ARS a USD',
+                descripcion: `Cambio ARS→USD (Tasa: $${tasaCambio}) ${descripcionBase}`,
+                montoARS: 0,
+                compartidoARS: 0,
+                montoUSD: usdRecibidos,
+                compartidoUSD: 0,
+                cuenta: 'Efectivo USD',
+                modalidad: document.getElementById('modalidad').value,
+                cuotas: 1,
+                pendiente: `Vinculado a egreso ARS ${arsEntregados}`,
+                pagador: document.getElementById('pagador').value
+            };
+
+            await enviarAGoogleSheets(egreso);
+            await enviarAGoogleSheets(ingreso);
+        }
+
+        async function enviarAGoogleSheets(data) {
+            if (!navigator.onLine) {
+                savePendingMovement(data);
+                showMessage('⚠️ Sin conexión. El movimiento se guardó localmente y se sincronizará cuando haya internet.', 'warning');
+                form.reset();
+                fechaInput.value = new Date().toISOString().split('T')[0];
+                return;
+            }
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                    mode: 'cors'
+                });
+
+                const result = await response.json();
+                
+                if (result.result === 'success') {
+                    showMessage('✅ Movimiento registrado exitosamente', 'success');
+                    form.reset();
+                    fechaInput.value = new Date().toISOString().split('T')[0];
+                    subcategoriaSelect.innerHTML = '<option value="">Seleccionar categoría primero...</option>';
+                    
+                    setTimeout(() => loadDashboard(), 1000);
+                } else {
+                    throw new Error(result.message || 'Error desconocido');
+                }
+
+            } catch (error) {
+                console.error('Error al enviar:', error);
+                savePendingMovement(data);
+                showMessage('⚠️ No se pudo conectar con el servidor. El movimiento se guardó localmente.', 'warning');
+                form.reset();
+                fechaInput.value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        // ============ GESTIÓN OFFLINE ============
+        function savePendingMovement(data) {
+            const pending = JSON.parse(localStorage.getItem(LOCALSTORAGE_KEY) || '[]');
+            pending.push({
+                data: data,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(pending));
+        }
+
+        async function syncPendingMovements() {
+            if (!navigator.onLine) return;
+
+            const pending = JSON.parse(localStorage.getItem(LOCALSTORAGE_KEY) || '[]');
+            if (pending.length === 0) return;
+
+            console.log(`Sincronizando ${pending.length} movimientos pendientes...`);
+
+            const failed = [];
+            for (const item of pending) {
+                try {
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(item.data),
+                        mode: 'cors'
+                    });
+                    
+                    const result = await response.json();
+                    if (result.result !== 'success') {
+                        failed.push(item);
+                    }
+                } catch (error) {
+                    console.error('Error sincronizando:', error);
+                    failed.push(item);
+                }
+            }
+
+            localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(failed));
+            
+            if (failed.length === 0) {
+                console.log('✅ Todos los movimientos sincronizados');
+            } else {
+                console.log(`⚠️ ${failed.length} movimientos no pudieron sincronizarse`);
+            }
+        }
+
+        function checkOnlineStatus() {
+            if (navigator.onLine) {
+                offlineIndicator.classList.remove('show');
+                syncPendingMovements();
+            } else {
+                offlineIndicator.classList.add('show');
+            }
+        }
+
+        // ============ DASHBOARD CON ANÁLISIS ============
+        async function loadDashboard() {
+            try {
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    updateDashboard(data);
+                }
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+            }
+        }
+
+        function updateDashboard(movimientos) {
+            let balanceARS = 0;
+            let balanceUSD = 0;
+            let gastosFijos = 0;
+            let gastosVariables = 0;
+            let gastosDiscrecionales = 0;
+
+            movimientos.forEach(mov => {
+                const categoria = mov.categoria;
+                const tipo = tipoCategoria[categoria];
+                const montoARS = mov.montoARS || 0;
+                const montoUSD = mov.montoUSD || 0;
+
+                // Balance general
+                if (mov.tipo === 'Ingreso') {
+                    balanceARS += montoARS;
+                    balanceUSD += montoUSD;
+                } else if (mov.tipo === 'Egreso') {
+                    balanceARS -= montoARS;
+                    balanceUSD -= montoUSD;
+                }
+
+                // Restar compartido
+                balanceARS -= (mov.compartidoARS || 0);
+                balanceUSD -= (mov.compartidoUSD || 0);
+
+                // Análisis por tipo (solo egresos reales)
+                if (mov.tipo === 'Egreso') {
+                    if (tipo === 'fijo') {
+                        gastosFijos += montoARS;
+                    } else if (tipo === 'variable') {
+                        gastosVariables += montoARS;
+                    } else if (tipo === 'discrecional') {
+                        gastosDiscrecionales += montoARS;
+                    }
+                }
+            });
+
+            // Actualizar UI
+            const balanceARSEl = document.getElementById('balanceARS');
+            balanceARSEl.textContent = `$${balanceARS.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            balanceARSEl.className = 'balance-amount' + (balanceARS < 0 ? ' negative' : '');
+
+            const balanceUSDEl = document.getElementById('balanceUSD');
+            balanceUSDEl.textContent = `US$${balanceUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            balanceUSDEl.className = 'balance-amount usd' + (balanceUSD < 0 ? ' negative' : '');
+
+            document.getElementById('gastosFijos').textContent = `$${gastosFijos.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+            document.getElementById('gastosVariables').textContent = `$${gastosVariables.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+            document.getElementById('gastosDiscrecionales').textContent = `$${gastosDiscrecionales.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalEgresos').textContent = `$${(gastosFijos + gastosVariables + gastosDiscrecionales).toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+        }
+
+        // ============ HISTORIAL ============
+        async function loadHistorial() {
+            const container = document.getElementById('historialContent');
+            
+            try {
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    renderHistorial(data);
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <p>No hay movimientos registrados aún</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error cargando historial:', error);
+                container.innerHTML = `
+                    <div class="message error">
+                        ❌ Error al cargar el historial
+                    </div>
+                `;
+            }
+        }
+
+        function renderHistorial(movimientos) {
+            const container = document.getElementById('historialContent');
+            
+            if (movimientos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>No hay movimientos registrados aún</p>
+                    </div>
+                `;
+                return;
+            }
+
+            movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            const html = `
+                <div class="history-list">
+                    ${movimientos.map((mov, index) => {
+                        const tipoClass = mov.tipo === 'Transferencia' ? 'transferencia' : mov.tipo.toLowerCase();
+                        const tipoCat = tipoCategoria[mov.categoria] || '';
+                        
+                        return `
+                        <div class="history-item ${tipoClass}" data-index="${index}">
+                            <div class="history-header">
+                                <span class="history-date">${formatDate(mov.fecha)}</span>
+                                <span class="history-type ${tipoClass}">${mov.tipo}</span>
+                            </div>
+                            <div class="history-category">
+                                ${mov.categoria} → ${mov.subcategoria}
+                                ${tipoCat ? `<span class="category-badge ${tipoCat}">${tipoCat}</span>` : ''}
+                            </div>
+                            ${mov.descripcion ? `<div class="history-description">${mov.descripcion}</div>` : ''}
+                            <div class="history-amount">
+                                ${mov.montoARS > 0 ? `<span class="amount-badge ars">$${mov.montoARS.toLocaleString('es-AR', {minimumFractionDigits: 2})}</span>` : ''}
+                                ${mov.montoUSD > 0 ? `<span class="amount-badge usd">US$${mov.montoUSD.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>` : ''}
+                            </div>
+                            ${mov.compartidoARS > 0 || mov.compartidoUSD > 0 ? `
+                                <div class="history-description">
+                                    💰 Cuenta por cobrar: ${mov.compartidoARS > 0 ? `$${mov.compartidoARS.toFixed(2)}` : ''} ${mov.compartidoUSD > 0 ? `US$${mov.compartidoUSD.toFixed(2)}` : ''}
+                                </div>
+                            ` : ''}
+                            ${mov.pendiente ? `<div class="history-description">📌 ${mov.pendiente}</div>` : ''}
+                            <div class="history-actions">
+                                <button class="btn-small btn-edit" onclick="editMovimiento(${index})">✏️ Editar</button>
+                                <button class="btn-small btn-delete" onclick="deleteMovimiento(${index})">🗑️ Eliminar</button>
+                            </div>
+                        </div>
+                    `}).join('')}
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            return date.toLocaleDateString('es-ES', { 
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+        }
+
+        // ============ EDITAR Y ELIMINAR (PLACEHOLDER) ============
+        function editMovimiento(index) {
+            showMessage('⚠️ Función de edición en desarrollo. Por ahora, elimina y crea uno nuevo.', 'warning');
+        }
+
+        function deleteMovimiento(index) {
+            if (confirm('¿Estás seguro de que quieres eliminar este movimiento?')) {
+                showMessage('⚠️ Función de eliminación en desarrollo. Para eliminar, hazlo manualmente desde Google Sheets.', 'warning');
+            }
+        }
+
+        // ============ MENSAJES ============
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // ============ AUTO-SYNC PERIÓDICO ============
+        setInterval(() => {
+            if (navigator.onLine) {
+                syncPendingMovements();
+            }
+        }, 60000);
+    </script>
+</body>
+</html>
